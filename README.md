@@ -153,11 +153,6 @@ streamlit run app.py
 
 ---
 
-## 📈 GitHub Stats
-
-![GitHub Stats](https://github-readme-stats.vercel.app/api?username=vandana296&show_icons=true&theme=tokyonight)
-
-![Top Languages](https://github-readme-stats.vercel.app/api/top-langs/?username=vandana296&layout=compact&theme=tokyonight)
 
 # 👩‍💻 Author
 
