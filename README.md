@@ -186,6 +186,47 @@ Executive-level analytics including:
 - ReportLab
 
 ---
+# 📸 Application Screenshots
+
+## 📊 Dashboard
+
+![Dashboard](assets/screenshots/dashboard.png)
+
+---
+
+## 🤖 AI Assistant
+
+![AI Assistant](assets/screenshots/ai_assistant.png)
+
+---
+
+## 📉 Sales Prediction
+
+![Sales Prediction](assets/screenshots/sales_prediction.png)
+
+---
+
+## 📈 Executive BI Dashboard
+
+![Executive Dashboard](assets/screenshots/executive_dashboard.png)
+
+---
+
+## 📄 Reports
+
+![Reports](assets/screenshots/reports.png)
+
+---
+
+## 💬 Natural Language Analyst
+
+![Natural Language Analyst](assets/screenshots/nl_analyst.png)
+
+---
+
+## 📊 AI Data Visualizer
+
+![AI Data Visualizer](assets/screenshots/data_visualizer.png)
 
 # 📂 Project Structure
 
