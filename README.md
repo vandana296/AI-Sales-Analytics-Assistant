@@ -3,6 +3,17 @@
 Machine Learning • Business Intelligence • Generative AI
 
 ---
+![Python](https://img.shields.io/badge/Python-3.11-blue?logo=python)
+![Streamlit](https://img.shields.io/badge/Streamlit-red?logo=streamlit)
+![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-orange?logo=scikitlearn)
+![Plotly](https://img.shields.io/badge/Plotly-success?logo=plotly)
+![Google Gemini](https://img.shields.io/badge/Google-Gemini_AI-green?logo=google)
+![License](https://img.shields.io/badge/License-MIT-yellow)
+
+## 🚀 Live Demo
+
+🔗 https://your-streamlit-app.streamlit.app
+
 
 ## 📌 Overview
 
@@ -141,6 +152,12 @@ streamlit run app.py
 - Real-time Dashboard
 
 ---
+
+## 📈 GitHub Stats
+
+![GitHub Stats](https://github-readme-stats.vercel.app/api?username=vandana296&show_icons=true&theme=tokyonight)
+
+![Top Languages](https://github-readme-stats.vercel.app/api/top-langs/?username=vandana296&layout=compact&theme=tokyonight)
 
 # 👩‍💻 Author
 
