@@ -1,0 +1,11 @@
+if not os.path.exists(history_path):
+
+    pd.DataFrame(columns=[
+        "Date",
+        "Category",
+        "Region",
+        "Segment",
+        "Quantity",
+        "Discount",
+        "Predicted Sales"
+    ]).to_csv(history_path, index=False)
