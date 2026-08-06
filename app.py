@@ -11,10 +11,9 @@ st.set_page_config(
 )
 load_theme()
 
-# Sidebar
 st.sidebar.image(
-    "assets/logo.png",
-    width=180
+    "assets/screenshots/sales_prediction.png",
+    use_container_width=True
 )
 
 st.sidebar.markdown("## AI Sales Analytics Assistant")

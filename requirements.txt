@@ -1,8 +1,10 @@
 streamlit==1.49.0
-pandas==2.3.2
-numpy==2.3.2
-scikit-learn==1.7.2
+
+pandas==2.2.3
+numpy==2.2.6
+scikit-learn==1.6.1
 xgboost==3.0.4
+
 matplotlib==3.10.5
 plotly==6.3.0
 seaborn==0.13.2
@@ -12,19 +14,12 @@ reportlab==4.4.3
 pillow==11.3.0
 
 python-dotenv==1.1.1
-requests==2.34.2
+requests==2.32.3
 
 google-genai==1.35.0
 
 langchain==0.3.27
-langchain-community==0.3.29
 langchain-core==0.3.76
-
-sentence-transformers==5.1.0
-faiss-cpu==1.12.0
-huggingface_hub==0.36.2
-transformers==4.57.1
-torch==2.8.0
 
 pypdf==6.0.0
 
