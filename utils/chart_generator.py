@@ -137,4 +137,4 @@ def generate_chart(df, query):
             title="Sales by Category"
         )
 
-        return fig, chart_df
+        return fig, chart_df    
