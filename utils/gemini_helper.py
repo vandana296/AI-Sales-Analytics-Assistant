@@ -1,6 +1,6 @@
 import os
 import time
-
+import streamlit as st
 from dotenv import load_dotenv
 from google import genai
 
@@ -17,10 +17,10 @@ load_dotenv()
 # --------------------------------------------------
 
 client = genai.Client(
-    api_key=os.getenv("GOOGLE_API_KEY")
+    api_key=st.secrets[]"GOOGLE_API_KEY"]
 )
 
-MODEL_NAME = os.getenv("GEMINI_MODEL", "gemini-flash-latest")
+MODEL_NAME = st.secrets.get("GEMINI_MODEL", "gemini-flash-latest")
 
 
 # --------------------------------------------------
