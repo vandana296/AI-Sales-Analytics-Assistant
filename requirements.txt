@@ -27,3 +27,4 @@ pypdf
 GitPython
 protobuf
 pyarrow
+langchain-google-genai

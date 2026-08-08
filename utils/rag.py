@@ -3,7 +3,7 @@ import streamlit as st
 
 from langchain_core.documents import Document
 from langchain_community.vectorstores import FAISS
-from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
 
 
 # -----------------------------------------
@@ -14,19 +14,20 @@ VECTOR_PATH = "models/faiss_index"
 
 
 # -----------------------------------------
-# Load Embedding Model
+# Gemini Embedding Model
 # -----------------------------------------
 
 @st.cache_resource
 def get_embedding_model():
 
-    print("Loading embedding model...")
+    print("Loading Gemini embedding model...")
 
-    embeddings = HuggingFaceEmbeddings(
-        model_name="sentence-transformers/all-MiniLM-L6-v2"
+    embeddings = GoogleGenerativeAIEmbeddings(
+        model="models/gemini-embedding-001",
+        google_api_key=st.secrets["GOOGLE_API_KEY"]
     )
 
-    print("Embedding model loaded")
+    print("Gemini embedding model loaded")
 
     return embeddings
 
@@ -40,14 +41,11 @@ def create_vector_store(df):
 
     embedding_model = get_embedding_model()
 
-
     # -------------------------------------
     # Load Existing FAISS Database
     # -------------------------------------
 
-    if os.path.exists(
-        VECTOR_PATH
-    ):
+    if os.path.exists(VECTOR_PATH):
 
         print("Loading existing FAISS database...")
 
@@ -61,25 +59,21 @@ def create_vector_store(df):
 
         return vectorstore
 
-
-
     # -------------------------------------
     # Create New FAISS Database
     # -------------------------------------
 
     print("Creating new FAISS database...")
 
-
     documents = []
-
 
     for index, row in df.iterrows():
 
         text = f"""
-        Sales Record {index}
+Sales Record {index}
 
-        {row.to_string()}
-        """
+{row.to_string()}
+"""
 
         documents.append(
             Document(
@@ -87,17 +81,14 @@ def create_vector_store(df):
             )
         )
 
-
     print(
         f"Creating embeddings for {len(documents)} records..."
     )
-
 
     vectorstore = FAISS.from_documents(
         documents,
         embedding_model
     )
-
 
     # -------------------------------------
     # Save FAISS Database
@@ -108,19 +99,15 @@ def create_vector_store(df):
         exist_ok=True
     )
 
-
     vectorstore.save_local(
         VECTOR_PATH
     )
-
 
     print(
         "FAISS database saved successfully"
     )
 
-
     return vectorstore
-
 
 
 # -----------------------------------------
@@ -128,9 +115,9 @@ def create_vector_store(df):
 # -----------------------------------------
 
 def search_documents(
-        vectorstore,
-        question,
-        k=5
+    vectorstore,
+    question,
+    k=5
 ):
 
     docs = vectorstore.similarity_search(
@@ -139,7 +126,6 @@ def search_documents(
     )
 
     return docs
-
 
 
 # -----------------------------------------
@@ -153,11 +139,9 @@ def prepare_context(docs):
     for i, doc in enumerate(docs):
 
         context += f"""
+===== Record {i+1} =====
 
-        ===== Record {i+1} =====
-
-        {doc.page_content}
-
-        """
+{doc.page_content}
+"""
 
     return context
