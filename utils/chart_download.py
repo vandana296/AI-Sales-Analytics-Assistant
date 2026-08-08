@@ -2,15 +2,18 @@ from io import BytesIO
 import streamlit as st
 
 
-# ------------------------------------------
-# CSV Download
-# ------------------------------------------
+# =========================================================
+# CSV DOWNLOAD
+# =========================================================
 
 def dataframe_to_csv(df):
     return df.to_csv(index=False).encode("utf-8")
 
 
-def download_chart_csv(df, filename="chart_data.csv"):
+def download_chart_csv(
+    df,
+    filename="chart_data.csv"
+):
 
     st.download_button(
         label="📥 Download CSV",
@@ -21,9 +24,9 @@ def download_chart_csv(df, filename="chart_data.csv"):
     )
 
 
-# ------------------------------------------
-# HTML Download
-# ------------------------------------------
+# =========================================================
+# HTML DOWNLOAD
+# =========================================================
 
 def figure_to_html(fig):
 
@@ -32,7 +35,10 @@ def figure_to_html(fig):
     )
 
 
-def download_chart_html(fig, filename="chart.html"):
+def download_chart_html(
+    fig,
+    filename="chart.html"
+):
 
     st.download_button(
         label="🌐 Download HTML",
@@ -43,36 +49,52 @@ def download_chart_html(fig, filename="chart.html"):
     )
 
 
-# ------------------------------------------
-# PNG Download
-# ------------------------------------------
+# =========================================================
+# PNG DOWNLOAD
+# =========================================================
 
 def figure_to_png(fig):
 
-    """
-    Requires:
-    pip install kaleido
-    """
+    try:
 
-    buffer = BytesIO()
+        buffer = BytesIO()
 
-    fig.write_image(
-        buffer,
-        format="png",
-        scale=2
-    )
+        fig.write_image(
+            buffer,
+            format="png",
+            scale=2
+        )
 
-    buffer.seek(0)
+        buffer.seek(0)
 
-    return buffer
+        return buffer.getvalue()
+
+    except Exception as e:
+
+        st.error(
+            "❌ PNG export is currently unavailable."
+        )
+
+        st.code(
+            f"{type(e).__name__}: {str(e)}"
+        )
+
+        return None
 
 
-def download_chart_png(fig, filename="chart.png"):
+def download_chart_png(
+    fig,
+    filename="chart.png"
+):
 
-    st.download_button(
-        label="🖼 Download PNG",
-        data=figure_to_png(fig),
-        file_name=filename,
-        mime="image/png",
-        use_container_width=True
-    )
+    png_data = figure_to_png(fig)
+
+    if png_data is not None:
+
+        st.download_button(
+            label="🖼 Download PNG",
+            data=png_data,
+            file_name=filename,
+            mime="image/png",
+            use_container_width=True
+        )

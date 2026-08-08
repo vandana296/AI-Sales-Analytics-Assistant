@@ -6,7 +6,7 @@ scikit-learn
 xgboost
 
 matplotlib
-plotly
+plotly==6.3.0
 seaborn
 
 openpyxl
@@ -29,7 +29,4 @@ pypdf
 
 protobuf
 pyarrow
-langchain-core
-langchain-community
-faiss-cpu
-sentence-transformers
+kaleido==1.1.0
