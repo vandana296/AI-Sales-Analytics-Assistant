@@ -1,6 +1,6 @@
 streamlit==1.49.0
 
-pandas
+pandas==2.2.3
 numpy
 scikit-learn
 xgboost
@@ -18,14 +18,14 @@ requests
 
 google-genai
 
-langchain
-langchain-community
 langchain-core
+langchain-community
+langchain
+
+faiss-cpu
+sentence-transformers
 
 pypdf
 
-GitPython
 protobuf
 pyarrow
-langchain-google-genai
-faiss-cpu

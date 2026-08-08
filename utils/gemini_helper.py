@@ -1,4 +1,3 @@
-import os
 import time
 import streamlit as st
 from dotenv import load_dotenv
@@ -10,18 +9,37 @@ from google import genai
 
 load_dotenv()
 
+
+# --------------------------------------------------
+# Get API Key from Streamlit Secrets
+# --------------------------------------------------
+
+GOOGLE_API_KEY = st.secrets.get("GOOGLE_API_KEY")
+
+if not GOOGLE_API_KEY:
+    raise RuntimeError(
+        "GOOGLE_API_KEY is missing from Streamlit Secrets."
+    )
+
+
 # --------------------------------------------------
 # Gemini Client
 # --------------------------------------------------
 
 client = genai.Client(
-    api_key=st.secrets["GOOGLE_API_KEY"]
+    api_key=GOOGLE_API_KEY
 )
+
+
+# --------------------------------------------------
+# Gemini Model
+# --------------------------------------------------
 
 MODEL_NAME = st.secrets.get(
     "GEMINI_MODEL",
     "gemini-flash-latest"
 )
+
 
 # --------------------------------------------------
 # Ask Gemini
@@ -36,32 +54,35 @@ You are helping users analyze business sales data.
 
 Answer ONLY using the supplied sales records.
 
-==================================================
+==============================
 SALES DATA
-==================================================
+==============================
 
 {context}
 
-==================================================
+==============================
 USER QUESTION
-==================================================
+==============================
 
 {question}
 
-==================================================
-Instructions:
+==============================
+INSTRUCTIONS
+==============================
 
 1. Give a direct answer.
 2. Explain the business insights.
 3. Provide 3 actionable recommendations.
 4. If the answer is not available in the provided data, clearly say:
-   "I couldn't find enough information in the uploaded sales data."
+
+"I couldn't find enough information in the uploaded sales data."
+
 5. Never make up facts.
 
 Respond professionally using Markdown.
 """
 
-    max_retries = 5
+    max_retries = 3
 
     for attempt in range(max_retries):
 
@@ -72,59 +93,92 @@ Respond professionally using Markdown.
                 contents=prompt
             )
 
-            if (
-                response is not None
-                and hasattr(response, "text")
-                and response.text
-            ):
-                return response.text
+            # --------------------------------------
+            # Check response
+            # --------------------------------------
 
-            return "⚠️ Gemini returned an empty response."
+            if response is None:
+                return "❌ Gemini returned None."
+
+            if not hasattr(response, "text"):
+                return (
+                    "❌ Gemini response does not contain text.\n\n"
+                    f"Response type: {type(response)}"
+                )
+
+            if not response.text:
+                return "❌ Gemini returned an empty response."
+
+            return response.text
 
         except Exception as e:
 
-            error = str(e)
+            error_type = type(e).__name__
+            error_message = str(e)
 
-            # Temporary overload
-            if "503" in error or "UNAVAILABLE" in error:
+            # --------------------------------------
+            # Rate limit / temporary error
+            # --------------------------------------
+
+            if (
+                "503" in error_message
+                or "UNAVAILABLE" in error_message
+                or "429" in error_message
+            ):
 
                 if attempt < max_retries - 1:
 
-                    wait = 2 ** attempt
-                    time.sleep(wait)
+                    wait_time = 2 ** attempt
+                    time.sleep(wait_time)
 
                     continue
 
                 return (
-                    "⚠️ Gemini AI is currently experiencing high demand.\n\n"
+                    "⚠️ Gemini is temporarily unavailable.\n\n"
                     "Please try again in a few minutes."
                 )
 
+            # --------------------------------------
             # Invalid model
-            elif "404" in error:
+            # --------------------------------------
+
+            if "404" in error_message:
 
                 return (
-                    f"❌ Model '{MODEL_NAME}' was not found.\n"
-                    "Please check the GEMINI_MODEL value in Streamlit Secrets."
+                    f"❌ Gemini model '{MODEL_NAME}' was not found.\n\n"
+                    "Check GEMINI_MODEL in Streamlit Secrets."
                 )
 
-            # Invalid API Key
-            elif "401" in error or "403" in error:
+            # --------------------------------------
+            # Invalid API key
+            # --------------------------------------
+
+            if (
+                "401" in error_message
+                or "403" in error_message
+                or "API_KEY_INVALID" in error_message
+            ):
 
                 return (
-                    "❌ Invalid Google API Key.\n"
-                    "Please verify GOOGLE_API_KEY in Streamlit Secrets."
+                    "❌ Google API key is invalid.\n\n"
+                    "Please check GOOGLE_API_KEY in Streamlit Secrets."
                 )
 
-            else:
+            # --------------------------------------
+            # Any other error
+            # --------------------------------------
 
-                return f"❌ AI Error:\n\n{error}"
+            return (
+                f"❌ Gemini Error\n\n"
+                f"**Error Type:** `{error_type}`\n\n"
+                f"**Message:** `{error_message}`"
+            )
 
-    return "❌ Unable to generate a response."
+    return "❌ Unable to generate a Gemini response."
 
 
 # --------------------------------------------------
-# Simple Gemini (No RAG Context)
+# Simple Gemini
 # --------------------------------------------------
 
 def ask_gemini_simple(prompt):
@@ -136,15 +190,24 @@ def ask_gemini_simple(prompt):
             contents=prompt
         )
 
-        if (
-            response is not None
-            and hasattr(response, "text")
-            and response.text
-        ):
-            return response.text
+        if response is None:
+            return "❌ Gemini returned None."
 
-        return "⚠️ Gemini returned an empty response."
+        if not hasattr(response, "text"):
+            return (
+                "❌ Gemini response does not contain text.\n\n"
+                f"Response type: {type(response)}"
+            )
+
+        if not response.text:
+            return "❌ Gemini returned an empty response."
+
+        return response.text
 
     except Exception as e:
 
-        return f"❌ AI Error:\n\n{e}"
+        return (
+            f"❌ Gemini Error\n\n"
+            f"**Error Type:** `{type(e).__name__}`\n\n"
+            f"**Message:** `{str(e)}`"
+        )

@@ -21,9 +21,9 @@ from utils.gemini_helper import ask_gemini
 from utils.theme import load_theme, show_header
 
 
-# ---------------------------------------------------
-# Page Configuration
-# ---------------------------------------------------
+# =========================================================
+# PAGE CONFIGURATION
+# =========================================================
 
 st.set_page_config(
     page_title="AI Business Copilot",
@@ -34,6 +34,11 @@ st.set_page_config(
 load_theme()
 
 show_header("🤖 AI Business Copilot - RAG Assistant")
+
+
+# =========================================================
+# INTRO
+# =========================================================
 
 st.markdown("""
 Ask questions about your sales data.
@@ -48,15 +53,17 @@ Ask questions about your sales data.
 
 st.divider()
 
-# ---------------------------------------------------
-# Initialize Chat
-# ---------------------------------------------------
+
+# =========================================================
+# INITIALIZE CHAT
+# =========================================================
 
 initialize_chat()
 
-# ---------------------------------------------------
-# Load Dataset
-# ---------------------------------------------------
+
+# =========================================================
+# LOAD DATASET
+# =========================================================
 
 try:
 
@@ -65,30 +72,47 @@ try:
     sheet_name, df = find_main_dataset(sheets)
 
     if df is None:
-
-        st.error("❌ No suitable dataset found")
-
+        st.error("❌ No suitable dataset found.")
         st.stop()
 
 except Exception as e:
 
-    st.error(f"Dataset loading error: {e}")
+    st.error(f"❌ Dataset loading error: {e}")
+    st.stop()
+
+
+# =========================================================
+# CREATE RAG VECTOR STORE
+# =========================================================
+
+try:
+
+    with st.spinner("🧠 Creating AI Knowledge Base..."):
+
+        vectorstore = create_vector_store(df)
+
+    st.success("✅ AI Knowledge Base Ready")
+
+except Exception as e:
+
+    st.error("❌ Failed to create AI Knowledge Base.")
+
+    st.code(
+        str(e),
+        language="text"
+    )
+
+    st.warning(
+        "The problem is currently in the RAG/FAISS layer, "
+        "not the Gemini chat layer."
+    )
 
     st.stop()
 
-# ---------------------------------------------------
-# Create RAG Vector Store
-# ---------------------------------------------------
 
-with st.spinner("Creating AI Knowledge Base..."):
-
-    vectorstore = create_vector_store(df)
-
-st.success("✅ AI Knowledge Base Ready")
-
-# ---------------------------------------------------
-# Sidebar
-# ---------------------------------------------------
+# =========================================================
+# SIDEBAR
+# =========================================================
 
 st.sidebar.title("🤖 AI Copilot")
 
@@ -100,75 +124,101 @@ st.sidebar.write(f"**Columns:** {len(df.columns)}")
 
 st.sidebar.divider()
 
-# Download Chat
 
-if get_messages():
+# =========================================================
+# DOWNLOAD CHAT
+# =========================================================
+
+messages = get_messages()
+
+if messages:
 
     chat_text = ""
 
-    for msg in get_messages():
+    for msg in messages:
 
-        role = "You" if msg["role"] == "user" else "AI"
+        role = (
+            "You"
+            if msg["role"] == "user"
+            else "AI"
+        )
 
-        chat_text += f"{role}:\n{msg['content']}\n\n"
+        chat_text += (
+            f"{role}:\n"
+            f"{msg['content']}\n\n"
+        )
 
     st.sidebar.download_button(
-
         "📥 Download Chat",
-
         data=chat_text,
-
         file_name="AI_Conversation.txt",
-
         mime="text/plain",
-
         use_container_width=True
-
     )
 
-# Clear Chat
+
+# =========================================================
+# CLEAR CHAT
+# =========================================================
 
 if st.sidebar.button(
-
     "🗑 Clear Chat",
-
     use_container_width=True
-
 ):
 
     st.session_state.messages = []
 
     st.rerun()
 
-# ---------------------------------------------------
-# Quick Questions
-# ---------------------------------------------------
+
+# =========================================================
+# QUICK QUESTIONS
+# =========================================================
 
 st.subheader("💡 Quick Questions")
 
 col1, col2, col3 = st.columns(3)
 
+
 with col1:
 
-    if st.button("📊 Business Summary"):
+    if st.button(
+        "📊 Business Summary",
+        use_container_width=True
+    ):
 
-        st.session_state.question = "Give me a complete business summary."
+        st.session_state.question = (
+            "Give me a complete business summary."
+        )
+
 
 with col2:
 
-    if st.button("🏆 Best Product"):
+    if st.button(
+        "🏆 Best Product",
+        use_container_width=True
+    ):
 
-        st.session_state.question = "Which product has the highest sales?"
+        st.session_state.question = (
+            "Which product has the highest sales?"
+        )
+
 
 with col3:
 
-    if st.button("💡 Recommendations"):
+    if st.button(
+        "💡 Recommendations",
+        use_container_width=True
+    ):
 
-        st.session_state.question = "Give me five business recommendations."
+        st.session_state.question = (
+            "Give me five business recommendations."
+        )
 
-# ---------------------------------------------------
-# Chat History
-# ---------------------------------------------------
+
+# =========================================================
+# CHAT HISTORY
+# =========================================================
 
 for message in get_messages():
 
@@ -176,35 +226,59 @@ for message in get_messages():
 
         st.markdown(message["content"])
 
-# ---------------------------------------------------
-# User Question
-# ---------------------------------------------------
 
-question = st.chat_input("Ask your business question...")
+# =========================================================
+# USER QUESTION
+# =========================================================
 
+question = st.chat_input(
+    "Ask your business question..."
+)
+
+
+# Handle quick question
 if "question" in st.session_state:
 
     question = st.session_state.question
 
     del st.session_state.question
 
-# ---------------------------------------------------
-# AI Response
-# ---------------------------------------------------
+
+# =========================================================
+# AI RESPONSE
+# =========================================================
 
 if question:
 
-    add_message("user", question)
+    # ---------------------------------------------
+    # Show user message
+    # ---------------------------------------------
+
+    add_message(
+        "user",
+        question
+    )
 
     with st.chat_message("user"):
 
         st.markdown(question)
 
+
+    # ---------------------------------------------
+    # Generate AI response
+    # ---------------------------------------------
+
     with st.chat_message("assistant"):
 
-        with st.spinner("🤖 Gemini AI is analyzing your business..."):
+        with st.spinner(
+            "🤖 Gemini AI is analyzing your business..."
+        ):
 
             try:
+
+                # ---------------------------------
+                # Search RAG database
+                # ---------------------------------
 
                 docs = search_documents(
                     vectorstore,
@@ -212,21 +286,55 @@ if question:
                     k=5
                 )
 
-                context = prepare_context(docs)
 
-                response = ask_gemini(question, context)
+                # ---------------------------------
+                # Prepare Gemini context
+                # ---------------------------------
+
+                context = prepare_context(
+                    docs
+                )
+
+
+                # ---------------------------------
+                # Ask Gemini
+                # ---------------------------------
+
+                response = ask_gemini(
+                    question,
+                    context
+                )
+
 
             except Exception as e:
 
-                response = f"❌ AI Error: {e}"
+                response = (
+                    "❌ AI Error\n\n"
+                    f"`{type(e).__name__}`\n\n"
+                    f"{str(e)}"
+                )
+
+
+            # ---------------------------------
+            # Display response
+            # ---------------------------------
 
             st.markdown(response)
 
-    add_message("assistant", response)
 
-# ---------------------------------------------------
-# Footer
-# ---------------------------------------------------
+    # ---------------------------------------------
+    # Save response
+    # ---------------------------------------------
+
+    add_message(
+        "assistant",
+        response
+    )
+
+
+# =========================================================
+# FOOTER
+# =========================================================
 
 st.divider()
 
