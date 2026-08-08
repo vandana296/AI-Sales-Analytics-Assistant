@@ -4,24 +4,24 @@ import streamlit as st
 from dotenv import load_dotenv
 from google import genai
 
-
 # --------------------------------------------------
 # Load Environment Variables
 # --------------------------------------------------
 
 load_dotenv()
 
-
 # --------------------------------------------------
 # Gemini Client
 # --------------------------------------------------
 
 client = genai.Client(
-    api_key=st.secrets[]"GOOGLE_API_KEY"]
+    api_key=st.secrets["GOOGLE_API_KEY"]
 )
 
-MODEL_NAME = st.secrets.get("GEMINI_MODEL", "gemini-flash-latest")
-
+MODEL_NAME = st.secrets.get(
+    "GEMINI_MODEL",
+    "gemini-flash-latest"
+)
 
 # --------------------------------------------------
 # Ask Gemini
@@ -37,19 +37,18 @@ You are helping users analyze business sales data.
 Answer ONLY using the supplied sales records.
 
 ==================================================
-
 SALES DATA
+==================================================
 
 {context}
 
 ==================================================
-
 USER QUESTION
+==================================================
 
 {question}
 
 ==================================================
-
 Instructions:
 
 1. Give a direct answer.
@@ -92,7 +91,6 @@ Respond professionally using Markdown.
                 if attempt < max_retries - 1:
 
                     wait = 2 ** attempt
-
                     time.sleep(wait)
 
                     continue
@@ -107,7 +105,7 @@ Respond professionally using Markdown.
 
                 return (
                     f"❌ Model '{MODEL_NAME}' was not found.\n"
-                    "Please check the GEMINI_MODEL value in your .env file."
+                    "Please check the GEMINI_MODEL value in Streamlit Secrets."
                 )
 
             # Invalid API Key
@@ -115,7 +113,7 @@ Respond professionally using Markdown.
 
                 return (
                     "❌ Invalid Google API Key.\n"
-                    "Please verify GOOGLE_API_KEY in your .env file."
+                    "Please verify GOOGLE_API_KEY in Streamlit Secrets."
                 )
 
             else:
@@ -123,6 +121,7 @@ Respond professionally using Markdown.
                 return f"❌ AI Error:\n\n{error}"
 
     return "❌ Unable to generate a response."
+
 
 # --------------------------------------------------
 # Simple Gemini (No RAG Context)
