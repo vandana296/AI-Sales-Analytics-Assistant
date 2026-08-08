@@ -3,67 +3,44 @@ import streamlit as st
 
 from langchain_core.documents import Document
 from langchain_community.vectorstores import FAISS
-from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from langchain_community.embeddings import HuggingFaceEmbeddings
 
 
-# -----------------------------------------
-# FAISS Storage Path
-# -----------------------------------------
+# =========================================================
+# FAISS STORAGE PATH
+# =========================================================
 
 VECTOR_PATH = "models/faiss_index"
 
 
-# -----------------------------------------
-# Gemini Embedding Model
-# -----------------------------------------
+# =========================================================
+# HUGGINGFACE EMBEDDING MODEL
+# =========================================================
 
 @st.cache_resource
 def get_embedding_model():
 
-    print("Loading Gemini embedding model...")
+    print("Loading HuggingFace embedding model...")
 
-    embeddings = GoogleGenerativeAIEmbeddings(
-        model="models/gemini-embedding-001",
-        google_api_key=st.secrets["GOOGLE_API_KEY"]
+    embeddings = HuggingFaceEmbeddings(
+        model_name="sentence-transformers/all-MiniLM-L6-v2"
     )
 
-    print("Gemini embedding model loaded")
+    print("Embedding model loaded successfully")
 
     return embeddings
 
 
-# -----------------------------------------
-# Create / Load Vector Store
-# -----------------------------------------
+# =========================================================
+# CREATE VECTOR STORE
+# =========================================================
 
 @st.cache_resource
 def create_vector_store(df):
 
     embedding_model = get_embedding_model()
 
-    # -------------------------------------
-    # Load Existing FAISS Database
-    # -------------------------------------
-
-    if os.path.exists(VECTOR_PATH):
-
-        print("Loading existing FAISS database...")
-
-        vectorstore = FAISS.load_local(
-            VECTOR_PATH,
-            embedding_model,
-            allow_dangerous_deserialization=True
-        )
-
-        print("FAISS database loaded successfully")
-
-        return vectorstore
-
-    # -------------------------------------
-    # Create New FAISS Database
-    # -------------------------------------
-
-    print("Creating new FAISS database...")
+    print("Creating FAISS vector database...")
 
     documents = []
 
@@ -90,29 +67,14 @@ Sales Record {index}
         embedding_model
     )
 
-    # -------------------------------------
-    # Save FAISS Database
-    # -------------------------------------
-
-    os.makedirs(
-        "models",
-        exist_ok=True
-    )
-
-    vectorstore.save_local(
-        VECTOR_PATH
-    )
-
-    print(
-        "FAISS database saved successfully"
-    )
+    print("FAISS vector database created successfully")
 
     return vectorstore
 
 
-# -----------------------------------------
-# Search Documents
-# -----------------------------------------
+# =========================================================
+# SEARCH DOCUMENTS
+# =========================================================
 
 def search_documents(
     vectorstore,
@@ -128,9 +90,9 @@ def search_documents(
     return docs
 
 
-# -----------------------------------------
-# Prepare Context for Gemini
-# -----------------------------------------
+# =========================================================
+# PREPARE GEMINI CONTEXT
+# =========================================================
 
 def prepare_context(docs):
 
@@ -139,9 +101,12 @@ def prepare_context(docs):
     for i, doc in enumerate(docs):
 
         context += f"""
-===== Record {i+1} =====
+==============================
+RECORD {i + 1}
+==============================
 
 {doc.page_content}
+
 """
 
     return context
