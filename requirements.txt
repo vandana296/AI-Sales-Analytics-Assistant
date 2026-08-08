@@ -28,3 +28,4 @@ GitPython
 protobuf
 pyarrow
 langchain-google-genai
+faiss-cpu
